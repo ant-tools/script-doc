@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="script-doc" default="build library">
+	<include file="d://lib//tasks.xml" />
+	<property file="d://lib/libraries.properties" />
+
+	<property name="NAME" value="script-doc" />
+	<property name="VERSION" value="1.0.0" />
+	<property name="BUILD" value="../build" />
+
+	<property name="JAR" value="${BUILD}/${NAME}-${VERSION}.jar" />
+	<property name="API" value="${BUILD}/api/${NAME}" />
+
+	<property name="SRC" value="src" />
+	<property name="BIN" value="bin" />
+
+	<target name="all">
+		<antcall target="build library" />
+		<antcall target="generate apidoc" />
+	</target>
+
+	<target name="build library">
+		<jar destfile="${JAR}">
+			<zipfileset dir="${BIN}" includes="js/tools/script/doc/*.class,js/tools/script/doc/doclet/*.class" />
+		</jar>
+	</target>
+
+	<target name="generate-api-doc">
+		<delete dir="${API}" />
+		<javadoc destdir="${API}" private="yes">
+			<classpath>
+				<pathelement path="${java.home}/../lib/tools.jar" />
+				<pathelement path="${LIB-RHINO}" />
+				<pathelement path="${LIB-JS-LIB}" />
+			</classpath>
+
+			<packageset dir="src" />
+			<packageset dir="../script-commons/src" />
+
+			<link href="http://docs.oracle.com/javase/6/docs/api/" />
+			<link href="http://docs.oracle.com/javase/6/docs/jdk/api/javadoc/doclet/" />
+			<link href="http://api.js-lib.com/server/" />
+		</javadoc>
+	</target>
+
+	<target name="sync-api-doc" depends="generate-api-doc">
+		<js.Sync host="js-lib.com" source="${API}" target="api.js-lib.com/script-doc" />
+	</target>
+
+	<target name="clean all">
+		<delete file="${JAR}" verbose="yes" failonerror="no" />
+		<delete includeemptydirs="true" verbose="yes" failonerror="no">
+			<fileset dir="${API}" />
+		</delete>
+	</target>
+</project>
